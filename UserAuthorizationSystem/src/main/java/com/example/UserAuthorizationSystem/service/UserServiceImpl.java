@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService{
         User user=null;
 
         if(optionalUser.isPresent()){
-
+            //login flow
         }
         else{
             user = new User();
@@ -85,11 +85,25 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User validateToken(String token) {
-        return null;
+        Optional<Token> optionalToken = tokenRepository.findByValueAndDeletedAndExpiryAtGreaterThan(token
+           , false, new Date());
+
+        if(optionalToken.isEmpty()){
+            //will throw some exception
+            return null;
+        }
+        return optionalToken.get().getUser();
     }
 
     @Override
     public void logout(String token) {
-
+        Token t = null;
+        Optional<Token> optionalToken = tokenRepository.findByValueAndDeletedAndExpiryAtGreaterThan(token
+                , false, new Date());
+        if(optionalToken.isPresent()) {
+            t = optionalToken.get();
+            t.setDeleted(Boolean.TRUE);
+            tokenRepository.save(t);
+        }
     }
 }
